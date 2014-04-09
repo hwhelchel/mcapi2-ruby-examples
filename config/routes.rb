@@ -6,7 +6,7 @@ McapiRubyExample::Application.routes.draw do
 
   get "reports" => 'reports#index'
   get "reports/index"
-  get "reports/:id" => 'reports#view'
+  get "reports/:id" => 'reports#show'
 
   root "pages#home"
   # The priority is based upon order of creation: first created -> highest priority.
