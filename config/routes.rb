@@ -1,7 +1,7 @@
 McapiRubyExample::Application.routes.draw do
   get "lists" => 'lists#index'
   get "lists/index"
-  get "lists/:id" => 'lists#view'
+  get "lists/:id" => 'lists#show'
   post "lists/:id/subscribe" => 'lists#subscribe'
 
   get "reports" => 'reports#index'

@@ -1,59 +1,38 @@
 class ListsController < ApplicationController
+  rescue_from Mailchimp::ListDoesNotExistError, with: :list_does_not_exist
+  rescue_from Mailchimp::ListAlreadySubscribedError, with: :list_already_subscribed
 
   def index
-    begin
-      lists_res = @mc.lists.list
-      @lists = lists_res['data']
-    rescue Mailchimp::Error => ex
-      if ex.message
-        flash[:error] = ex.message
-      else
-        flash[:error] = "An unknown error occurred"
-      end
-      redirect_to "/"
-    end
+    lists_res = @mc.lists.list
+    @lists = lists_res['data']
   end
 
-  def view
+  def show
     list_id = params[:id]
-    begin
-      lists_res = @mc.lists.list({'list_id' => list_id})
-      @list = lists_res['data'][0]
-      members_res = @mc.lists.members(list_id)
-      @members = members_res['data']
-    rescue Mailchimp::ListDoesNotExistError
-      flash[:error] = "The list could not be found"
-      redirect_to "/lists/"
-    rescue Mailchimp::Error => ex
-      if ex.message
-        flash[:error] = ex.message
-      else
-        flash[:error] = "An unknown error occurred"
-      end
-      redirect_to "/lists/"
-    end
+    lists_res = @mc.lists.list({'list_id' => list_id})
+    @list = lists_res['data'][0]
+    members_res = @mc.lists.members(list_id)
+    @members = members_res['data']
   end
 
   def subscribe
     list_id = params[:id]
     email = params['email']
-    begin
-      @mc.lists.subscribe(params[:id], {'email' => email})
-      flash[:success] = "#{email} subscribed successfully"
-    rescue Mailchimp::ListAlreadySubscribedError
-      flash[:error] = "#{email} is already subscribed to the list"
-    rescue Mailchimp::ListDoesNotExistError
-      flash[:error] = "The list could not be found"
-      redirect_to "/lists/"
-      return
-    rescue Mailchimp::Error => ex
-      if ex.message
-        flash[:error] = ex.message
-      else
-        flash[:error] = "An unknown error occurred"
-      end
-    end
+    @mc.lists.subscribe(params[:id], {'email' => email})
+    flash[:success] = "#{email} subscribed successfully"
     redirect_to "/lists/#{list_id}"
   end
 
+  private
+
+  def list_does_not_exist(ex)
+    flash[:error] = "The list could not be found"
+    redirect_to_back_or_default
+  end
+
+  def list_already_subscribed
+    email = params['email'] 
+    flash[:error] = "#{email} is already subscribed to the list"
+    redirect_to_back_or_default
+  end
 end
