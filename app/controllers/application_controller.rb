@@ -2,6 +2,7 @@ require 'mailchimp'
 
 class ApplicationController < ActionController::Base
   before_action :setup_mcapi
+  rescue_from Mailchimp::InvalidApiKeyError, with: :api_key_error
   rescue_from Mailchimp::Error, with: :mailchimp_error
 
   def setup_mcapi
@@ -16,7 +17,11 @@ class ApplicationController < ActionController::Base
     else
       flash[:error] = "An unknown error occurred"
     end
-    redirect_to_back_or_default
+    redirect_to_back_or_default unless action_name == 'home'
+  end
+
+  def api_key_error(ex)
+    flash[:error] = "The API key is invalid. Update it in app/controllers/application_controller.rb"
   end
 
   def redirect_to_back_or_default(default = root_url)

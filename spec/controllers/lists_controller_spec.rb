@@ -25,7 +25,6 @@ describe ListsController do
     context 'Mailchimp::Error raised' do
       before(:each) { Mailchimp::Lists.any_instance.stub(:list){ raise Mailchimp::Error }}
       before(:each) { get :index }
-
       it 'redirects' do
         expect(response.status).to eq(302)
       end
