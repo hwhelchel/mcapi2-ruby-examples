@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
   rescue_from Mailchimp::Error, with: :mailchimp_error
 
   def setup_mcapi
-    @mc = Mailchimp::API.new(ENV['API_KEY'])
+    @mc = Mailchimp::API.new('00000000000000000000000000000000-us1')
   end
   
   private
